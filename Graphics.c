@@ -67,12 +67,15 @@ void	gdaRectangle(GDAs32 x0, GDAs32 y0, GDAs32 x1,GDAs32 y1, GDAu8 BorderColor, 
 	GDAs16 a = 0;
 	gdaLine(x0,y0,x1,y0, BorderColor);
 	gdaLine(x0,y1,x1,y1, BorderColor);
+	
+	if(x0>=0)
 	gdaLine(x0,y0,x0,y1, BorderColor);
+	
 	gdaLine(x1,y0,x1,y1, BorderColor);
 	
 	if(Fill == GDA_TRUE){
 		for(a = x0+1 ; a < x1; a++){
-			if(a<0) continue;
+			if(a>=0)
 			gdaLine(a,y0+1,a,y1-1,FillColor);
 		}
 	}
@@ -163,7 +166,7 @@ void processEntity(struct ImageEntry *Entity){
 			rect.BorderColor = Entity->color;
 			rect.Fill = 1;
 			
-			gdaRectangle(rect.x0, rect.y0,rect.x1, rect.y1, rect.BorderColor, rect.Fill, rect.Color);
+			gdaRectangle(rect.x0,rect.y0,rect.x1, rect.y1, rect.BorderColor, rect.Fill, rect.Color);
 			break;
 		
 		case 2 :   //circle
@@ -217,13 +220,13 @@ void process(){
 
 	if(flag == 0){
 
-		num_entities = 5;
+		num_entities = 7;
 
 		entities[0].type = 1;
 		entities[0].height = 30;
 		entities[0].width = 30;
 		entities[0].y = 100;
-		entities[0].x = 20;
+		entities[0].x = 0;
 		entities[0].color = 7;
 
 		entities[1].type = 1;
@@ -256,16 +259,16 @@ void process(){
 		
 		entities[5].type = 1;
 		entities[5].height = 30;
-		entities[5].width = 100;
+		entities[5].width = 200;
 		entities[5].y = 300;
 		entities[5].x = 0;
 		entities[5].color = 0;
 		
 		entities[6].type = 1;
-		entities[6].height = 10;
-		entities[6].width = 10;
-		entities[6].y = 60;
-		entities[6].x = 110;
+		entities[6].height = 30;
+		entities[6].width = 49;
+		entities[6].y = 350;
+		entities[6].x = 0;
 		entities[6].color = 0;
 		
 		entities[7].type = 1;
@@ -295,7 +298,7 @@ void process(){
 	else if(flag == 1) {
 		
 		entities[0].x += inc;
-		if(entities[0].x <= 0)
+		if(entities[0].x <= -20)
 			inc = 2;
 		if(entities[0].x + 30 >= VID_VSIZE)
 			inc = -2;

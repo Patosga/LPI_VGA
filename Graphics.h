@@ -71,13 +71,15 @@ struct ImageEntry {
 	unsigned int index;
 };
 
+extern __inline int DrawPoint(signed int x_point,signed int y_point,uint8_t data);
+
 void gdaSCircle(primCircle * CircleStruct);
 void gdaSLine(primLine* LineStruct);
 void gdaSRectangle(primRectangle* LineStruct);
 void gdaLine(GDAs32 x1, GDAs32 y1, GDAs32 x2, GDAs32 y2, GDAu8 data);
 void gdaRectangle(GDAs32 x0, GDAs32 y0, GDAs32 x1, GDAs32 y1, GDAu8 BorderColor, GDABool Fill, GDAu8 FillColor);
-void	gdaCircle(GDAu32 x, GDAu32 y, GDAu32 r, GDAu8 BorderColor,GDABool Fill,GDAu8 FillColor); /*GDACIRCLE BORDERCOLOR NOT IMPLEMENTED*/
-void 	gdaClearColor(GDAu16 R, GDAu16 G, GDAu16 B);
+void gdaCircle(GDAu32 x, GDAu32 y, GDAu32 r, GDAu8 BorderColor,GDABool Fill,GDAu8 FillColor); /*GDACIRCLE BORDERCOLOR NOT IMPLEMENTED*/
+void gdaClearColor(GDAu16 R, GDAu16 G, GDAu16 B);
 
 void gdaDrawImage(char image_index,int x,int y,int width, int height);
 void processEntity(struct ImageEntry *Entity);
