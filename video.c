@@ -515,7 +515,8 @@ void vidClearScreen(void)
 	//		fb2[y][VID_HSIZE+1] = 0x00;
 	}
 	
-	
+	//gdaLine(-20,200,20,200,0x00);
+	//gdaRectangle(-20,20,40,40,0x00,1,0x00);
 }
 
 void vidClearHalfScreen(void){
@@ -600,22 +601,24 @@ void eraseSquare(int x, int y, int height, int width){
 
 void vidInit(void)
 {
-	/*Populate DMA_TEST*/
-	//int i=0;
-	//int a=0xFF;
-	
-	/*for(i=0; i<100;i++){
-		if(i%2 != 0)
-		DMA_TEST[0][i]=a;
-	}*/
-	
 	vidClearScreen();
 	TIM8_Init();
 	TIM_Configuration();
 	DMA_Config();
 	//TIM5_Init();
-	
-	
 }
 
+int DrawPoint(signed int x_point,signed int y_point,uint8_t data)
+{
+	
+	if(x_point > VID_VSIZE - 1  || y_point > VID_HSIZE-1 || x_point < 0 || y_point < 0) return 0; //erro
+	
+	if((x_point >= (VID_VSIZE/2)  && istopdrawing) || (x_point <= (VID_VSIZE/2) - 1 && isbotdrawing))
+	{
+			fb[x_point][y_point+1] = data;
+
+	}
+	return 1;
+
+}
 

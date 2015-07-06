@@ -8,7 +8,7 @@ static GDAu8 BackGroundColor = COLOR_BLACK;
 
 // x[0-200] e y[0-399]
 
-void gdaLine(GDAu32 x1,GDAu32 y1,GDAu32 x2,GDAu32 y2,GDAu8 data) {
+void gdaLine(GDAs32 x1,GDAs32 y1,GDAs32 x2,GDAs32 y2,GDAu8 data) {
 
 GDAs32 		dx, dy, i, e;
 GDAs32		incx, incy, inc1, inc2;
@@ -62,9 +62,9 @@ GDAs32		x, y;
 
 
 
-void	gdaRectangle(GDAu32 x0, GDAu32 y0, GDAu32 x1,GDAu32 y1, GDAu8 BorderColor, GDABool Fill, GDAu8 FillColor) 
+void	gdaRectangle(GDAs32 x0, GDAs32 y0, GDAs32 x1,GDAs32 y1, GDAu8 BorderColor, GDABool Fill, GDAu8 FillColor) 
 {
-	GDAu16 a = 0;
+	GDAs16 a = 0;
 	gdaLine(x0,y0,x1,y0, BorderColor);
 	gdaLine(x0,y1,x1,y1, BorderColor);
 	gdaLine(x0,y0,x0,y1, BorderColor);
@@ -119,24 +119,6 @@ void gdaSLine(primLine* LineStruct){
 
 void gdaSRectangle(primRectangle* RectStruct){
 	gdaRectangle(RectStruct->x0,RectStruct->y0,RectStruct->x1,RectStruct->y1,RectStruct->BorderColor,RectStruct->Fill,RectStruct->Color);
-}
-
-
-
-
-
-int DrawPoint(uint32_t x_point,uint32_t y_point,uint8_t data)
-{
-	
-	if(x_point > VID_VSIZE - 1  || y_point > VID_HSIZE-1) return 0; //erro
-	
-	if((x_point >= (VID_VSIZE/2)  && istopdrawing) || (x_point <= (VID_VSIZE/2) - 1 && isbotdrawing))
-	{
-			fb[x_point][y_point+1] = data;
-
-	}
-	return 1;
-
 }
 
 
@@ -234,13 +216,13 @@ void process(){
 
 	if(flag == 0){
 
-		num_entities = 6;
+		num_entities = 5;
 
 		entities[0].type = 1;
 		entities[0].height = 30;
 		entities[0].width = 30;
 		entities[0].y = 100;
-		entities[0].x = 0;
+		entities[0].x = -20;
 		entities[0].color = 7;
 
 		entities[1].type = 1;
@@ -312,7 +294,7 @@ void process(){
 	else if(flag == 1) {
 		
 		entities[0].x += inc;
-		if(entities[0].x <= 0)
+		if(entities[0].x <= -20)
 			inc = 2;
 		if(entities[0].x + 30 >= VID_VSIZE)
 			inc = -2;

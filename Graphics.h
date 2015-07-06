@@ -23,10 +23,10 @@ typedef int32_t GDAs32;
 typedef uint8_t GDABool;
 
 typedef struct primRectangle {
-	GDAu16 x0;
-	GDAu16 y0;
-	GDAu16 x1;
-	GDAu16 y1;
+	GDAs16 x0;
+	GDAs16 y0;
+	GDAs16 x1;
+	GDAs16 y1;
 	GDABool Fill;
 	GDAu8 Color;
 	GDAu8 BorderColor;
@@ -71,17 +71,11 @@ struct ImageEntry {
 	unsigned int index;
 };
 
-
-
-
-int DrawPoint(uint32_t x_point,uint32_t y_point,uint8_t  data);
-
 void gdaSCircle(primCircle * CircleStruct);
 void gdaSLine(primLine* LineStruct);
 void gdaSRectangle(primRectangle* LineStruct);
-
-void gdaLine(GDAu32 x1, GDAu32 y1, GDAu32 x2, GDAu32 y2, GDAu8 data);
-void gdaRectangle(GDAu32 x0, GDAu32 y0, GDAu32 x1, GDAu32 y1, GDAu8 BorderColor, GDABool Fill, GDAu8 FillColor);
+void gdaLine(GDAs32 x1, GDAs32 y1, GDAs32 x2, GDAs32 y2, GDAu8 data);
+void gdaRectangle(GDAs32 x0, GDAs32 y0, GDAs32 x1, GDAs32 y1, GDAu8 BorderColor, GDABool Fill, GDAu8 FillColor);
 void	gdaCircle(GDAu32 x, GDAu32 y, GDAu32 r, GDAu8 BorderColor,GDABool Fill,GDAu8 FillColor); /*GDACIRCLE BORDERCOLOR NOT IMPLEMENTED*/
 void 	gdaClearColor(GDAu16 R, GDAu16 G, GDAu16 B);
 

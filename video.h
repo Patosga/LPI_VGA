@@ -20,6 +20,7 @@ extern volatile unsigned char processready;
 extern volatile unsigned char istopdrawing;
 extern volatile unsigned char isbotdrawing;
 
+int DrawPoint(signed int x_point,signed int y_point,uint8_t  data);
 void eraseSquare(int x, int y, int height, int width);
 void vidClearHalfScreen(void);
 void vidInit(void);
