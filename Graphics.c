@@ -72,6 +72,7 @@ void	gdaRectangle(GDAs32 x0, GDAs32 y0, GDAs32 x1,GDAs32 y1, GDAu8 BorderColor, 
 	
 	if(Fill == GDA_TRUE){
 		for(a = x0+1 ; a < x1; a++){
+			if(a<0) continue;
 			gdaLine(a,y0+1,a,y1-1,FillColor);
 		}
 	}
@@ -222,7 +223,7 @@ void process(){
 		entities[0].height = 30;
 		entities[0].width = 30;
 		entities[0].y = 100;
-		entities[0].x = -20;
+		entities[0].x = 20;
 		entities[0].color = 7;
 
 		entities[1].type = 1;
@@ -294,7 +295,7 @@ void process(){
 	else if(flag == 1) {
 		
 		entities[0].x += inc;
-		if(entities[0].x <= -20)
+		if(entities[0].x <= 0)
 			inc = 2;
 		if(entities[0].x + 30 >= VID_VSIZE)
 			inc = -2;

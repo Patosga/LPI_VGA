@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F40XX</Define>
               <Undefine></Undefine>
-              <IncludePath>..\WorkshopstmIII;.\Libraries\CMSIS\Include;.\Libraries\STM32F4xx_StdPeriph_Driver\inc;.\Libraries\CMSIS\Device\ST\STM32F4xx\Include</IncludePath>
+              <IncludePath>.\;.\Libraries\CMSIS\Include;.\Libraries\STM32F4xx_StdPeriph_Driver\inc;.\Libraries\CMSIS\Device\ST\STM32F4xx\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
