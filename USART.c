@@ -4,137 +4,45 @@
 #define DISABLE_DMA_INTERRUPTS NVIC_DisableIRQ(DMA1_Stream6_IRQn);NVIC_DisableIRQ(DMA1_Stream5_IRQn);
 #define ENABLE_DMA_INTERRUPTS NVIC_EnableIRQ(DMA1_Stream6_IRQn);NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 
-char input_buffer[INPUT_BUFFER_LENGTH]  __attribute__((at(0x2001C000))) ;
-volatile unsigned int istart, iend;
-char output_buffer[OUTPUT_BUFFER_LENGTH] __attribute__((at(0x2001C000 + INPUT_BUFFER_LENGTH))) ;
-volatile unsigned int ostart, oend;
-
-volatile unsigned char sendactive;
-volatile unsigned char sendfull;
-
+char input_buffer[INPUT_BUFFER_LENGTH]  __attribute__((at(0x2001C000))) = {0};
 volatile unsigned char TableReady = 0;
-
-void putbuf(char c);
-
-unsigned int vsram2received __attribute__((at(0x2001D804))) = 0;
 
 
 
 //RX
 __irq void DMA1_Stream5_IRQHandler(void){
-		static unsigned char c;
-		static unsigned char counter = 0;
 		static unsigned char first = 1;
 	
 		DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5);
 	
 		if(first){
-				counter = vsram2received;
+				DMA1_Stream5->CR &= ~0x01; 	
+				while ((DMA_GetCmdStatus(DMA1_Stream5)!= DISABLE)){};
+				DMA1_Stream5->NDTR  = input_buffer[0];
+				DMA1_Stream5->M0AR += 1;
+				DMA1_Stream5->CR |= 0x01;
+				while ((DMA_GetCmdStatus(DMA1_Stream5)!= ENABLE)){};	
 				first = 0;
+				USART_SendData(USART2, 0x56);
 		}
 		else{
-			counter--;
-			
-			if(istart + INPUT_BUFFER_LENGTH != iend)
-					input_buffer[iend++ & (INPUT_BUFFER_LENGTH-1)] = vsram2received;
-			
-			if(!counter){
-				first = 1;
 				TableReady = 1;
-			}
+				first = 1;
+			  DMA1_Stream5->CR &= ~0x01; 
+			  while ((DMA_GetCmdStatus(DMA1_Stream5)!= DISABLE)){};
+				DMA1_Stream5->M0AR -= 1;
+				DMA1_Stream5->NDTR  = 1;
 		}
-		
-
 }
-
-//TX
-__irq void USART2_IRQHandler(void){
-	
-		if( USART_GetITStatus(USART2, USART_IT_TC) ){	
 		
-		if(ostart != oend){
-			USART_SendData(USART2, output_buffer[ostart++ & (OUTPUT_BUFFER_LENGTH -1)]);
-			sendfull = 0;
-		}
-		else{
-			sendactive = 0;
-		}
-		
-		USART_ClearITPendingBit(USART2, USART_IT_TC);
-		
-		
-	}
-		//USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-	
-}
-
-void putbuf(char c){
-	
-	if(!sendfull){
-		
-		if(!sendactive){
-			sendactive = 1;
-			USART_SendData(USART2, c);
-		}
-		else {
-			DISABLE_DMA_INTERRUPTS
-			output_buffer[oend++ & (OUTPUT_BUFFER_LENGTH - 1)] = c;
-			if((((oend ^ ostart) & (OUTPUT_BUFFER_LENGTH - 1))) == 0){
-				sendfull = 1;
-			}
-			ENABLE_DMA_INTERRUPTS
-		}
-	}
-	
-}
-
-int fgetc(FILE *f){
-	
-  /*while ( USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == RESET);
-  return (uint8_t)USART_ReceiveData(USART2);*/
-	
-	char c;
-	
-	while(iend == istart)
-		;
-
-	DISABLE_DMA_INTERRUPTS
-	c = input_buffer[istart++ & (INPUT_BUFFER_LENGTH - 1)];
-	ENABLE_DMA_INTERRUPTS
-	
-	return c;
-	
-}
-
-int fputc(int c, FILE *f){
-	
-//	if(c == '\n')
-//		putbuf('\r');
-	
-	while(sendfull);
-	putbuf(c);
-	
-	return c;
-}
-
-void USART_sendData(void *addrs, int datasize ,int n){
-	
-	unsigned char *ptr = addrs;
-	int num_bytes = datasize * n, i;
-	
-	for(i = 0; i < num_bytes; i++){
-			putchar(*ptr);
-			ptr++;	
-	}
-	
-}
-
 void USART_readData(void *addr, int datasize, int n){
 	unsigned char *ptr = addr;
 	int num_bytes = datasize * n, i;
+	char * ptrbuff = input_buffer;
 	
+	ptrbuff++;
 	for(i = 0; i < num_bytes; i++){
-		*ptr = getchar();
+		*ptr = *(ptrbuff++);
 		ptr++;
 	}
 }
@@ -167,14 +75,14 @@ void USART_init(void){
   /* Configure DMA Stream */
 	DMA_InitStructure.DMA_Channel = DMA_Channel_4;  
   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(USART2->DR); //;0x40000010 &(GPIOB->ODR)//dest
-  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&vsram2received; //source TAVA fb
+  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)input_buffer; //source TAVA fb
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
   DMA_InitStructure.DMA_BufferSize = (uint32_t)1;
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
   DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
   DMA_InitStructure.DMA_Priority = DMA_Priority_High;
   DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;         
   DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
@@ -219,23 +127,10 @@ void USART_init(void){
 	usart_init_struct.USART_HardwareFlowControl= USART_HardwareFlowControl_None; // no flow control (standard)
 	usart_init_struct.USART_Mode= USART_Mode_Tx| USART_Mode_Rx; // enable transmitter and receiver//
 	
-	istart = iend = ostart = oend = 0;
-	sendactive = 0;
-	sendfull = 0;
-	
 	USART_Init(USART2, &usart_init_struct);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-	USART_ITConfig(USART2, USART_IT_TC, ENABLE);
 	USART_DMACmd(USART2,USART_DMAReq_Rx,ENABLE);
 	USART_Cmd(USART2, ENABLE);
 	
-
-	
-	// Enable the USART2 gloabal Interrupt
-	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn; // USART2 interrupts
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; 
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// USART2 interrupts enabled
-	NVIC_Init(&NVIC_InitStructure);
 
 }

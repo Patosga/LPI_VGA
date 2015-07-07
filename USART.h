@@ -22,8 +22,6 @@ extern "C" {
 extern char input_buffer[INPUT_BUFFER_LENGTH];
 extern char aux_buffer[INPUT_BUFFER_LENGTH];
 extern volatile unsigned int istart, iend;
-extern char output_buffer[OUTPUT_BUFFER_LENGTH];
-extern volatile unsigned int ostart, oend;
 
 extern volatile unsigned char sendactive;
 extern volatile unsigned char sendfull;

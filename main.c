@@ -14,7 +14,7 @@ int main(){
 	USART_init();
 	image_vector_init();
 	
-	putchar(0x55);
+	USART_SendData(USART2, 0x55);
 	
 	while (1){
 		if(processready == 1){

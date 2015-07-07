@@ -253,26 +253,31 @@ void process(){
 	//static struct ImageEntry entities[50];
 		static unsigned char counter = 0;
 	
-
 		if(TableReady){
+			flag = 1;
 			TableReady = 0;
-			entities_counter = getchar();
+			entities_counter = input_buffer[0]/16;
 			USART_readData(EntitiesToProcess, sizeof(struct ImageEntry), entities_counter);
 			counter = 2;
 		}
 		
-		if(counter-- > 0){
-			vidClearHalfScreen();
+		if(flag){
 		
-			for (i = 0; i < entities_counter; i++){ 
-			//eraseSquare(entities[i].y, entities[i].x, entities[i].height, entities[i].width);
-				processEntity(&EntitiesToProcess[i]);
+			if(counter-- > 0){
+				vidClearHalfScreen();
+			
+				for (i = 0; i < entities_counter; i++){ 
+				//eraseSquare(entities[i].y, entities[i].x, entities[i].height, entities[i].width);
+					processEntity(&EntitiesToProcess[i]);
+				}
 			}
-		}
-		else{
-			putchar(0x55);
-		}
-		
+			else{
+				flag = 0;
+				DMA_Cmd(DMA1_Stream5,ENABLE);
+				while ((DMA_GetCmdStatus(DMA1_Stream5)!= ENABLE)){};	
+				USART_SendData(USART2, 0x55);
+			}
+	}	
 }
 		
 	
