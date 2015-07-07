@@ -2,7 +2,9 @@
 #include "Graphics.h"
 #include "mathsin.h"
 #include "math.h"
+#include "string.h"
 
+struct ImageEntry EntitiesToProcess[50] __attribute__((at(0x2001D814)));
 
 static GDAu8 BackGroundColor = COLOR_BLACK;
 
@@ -147,11 +149,48 @@ void gdaDrawImage(char image_index,int x,int y,int width, int height)
 }
 
 
+void gdaDrawLetter(unsigned char image_index,int x,int y,int width, int height)
+{
+	unsigned char data;
+	const unsigned char *image;
+
+	int x_image, y_image;
+	image = ascii_vector[image_index];
+	for(x_image=0; x_image<height; x_image++)
+	{
+		for(y_image=0; y_image<width; y_image++)
+		{
+			data = image[(x_image*width)+y_image];
+			data = ((data << 6) & 0xc0) | ((data >> 5) & 0x7) | ((data << 1) & 0x38);
+			if(data==TRANSPARENCE) continue;
+			DrawPoint((x+x_image),(y+y_image),data);
+		}
+	}
+}
+
+void gdaDrawString(unsigned char index,int tamanho, int x, int y)
+{
+	int length,i,incremento, width, height, letter_index;
+	
+	if (tamanho == 1) {incremento = 124; width = height = 6;} 		// tamanho pequeno
+	if (tamanho == 3) {incremento = 62; width = height = 12;} 			// tamanho grande
+	if (tamanho == 2) {incremento = 0; width = height = 8;}				// tamanho normal
+	
+	for(length=0; words[index][length]!='\0'; ++length); // tamanho da palavra
+	for(i=0;i<length;i++)	// ciclo para unir letras
+	{		
+		letter_index = words[index][i];		// index = ascii
+		
+		gdaDrawLetter((letter_index+incremento),x,(y+(width*i)),width, height); // desenhar letras para todos os tamanhos
+	}
+}
+
 void processEntity(struct ImageEntry *Entity){
 	
 	struct primRectangle rect;
 	struct primCircle circle;
 	struct primImage image;
+	
 	
 	switch(Entity->type){
 		case 0 : break;   //null
@@ -159,13 +198,13 @@ void processEntity(struct ImageEntry *Entity){
 				
 			rect.x0 = Entity->x;
 			rect.y0 = Entity->y;
-			rect.x1 = Entity->x + Entity->width;
-			rect.y1 = Entity->y + Entity->height;
+			rect.x1 = Entity->x + Entity->height;
+			rect.y1 = Entity->y + Entity->width;
 			rect.Color = Entity->color;
 			rect.DeepLevel = Entity->layer;
 			rect.BorderColor = Entity->color;
 			rect.Fill = 1;
-			
+			//gdaSRectangle(&rect);
 			gdaRectangle(rect.x0,rect.y0,rect.x1, rect.y1, rect.BorderColor, rect.Fill, rect.Color);
 			break;
 		
@@ -180,6 +219,8 @@ void processEntity(struct ImageEntry *Entity){
 			circle.DeepLevel = Entity->layer;
 		
 			gdaCircle(circle.x0, circle.y0, circle.Radius, circle.BorderColor, circle.Fill, circle.Color );
+			//gdaSCircle(&circle);
+		
 			break;
 		
 		case 3 :   //pixmap
@@ -188,35 +229,56 @@ void processEntity(struct ImageEntry *Entity){
 			image.y0 = Entity->y;
 			image.height = Entity->height;
 			image.width = Entity->width;
-	
-			//gdaDrawImage(image.index, image.x0, image.y0, image.height, image.width);
+			
+			gdaDrawImage(image.index, image.x0, image.y0, image.height, image.width);
 		
 			break;
 		
 		case 4 :    //text
+				
+		
 			break;
 	}
 }
 
 void process(){
 
-	static unsigned char num_entities = 0;
-	static unsigned char flag = 0, flag2 = 1;
-	unsigned char i = 0;
-	static unsigned int inc = 5;
-	unsigned char begin = 0x55;
-	static struct ImageEntry entities[50];
-	static unsigned char counter = 0;
+		static unsigned char entities_counter = 0;
+		static unsigned char flag = 0;
+	//static unsigned char flag = 0, flag2 = 1;
+		unsigned char i = 0;
+	//static unsigned int inc = 5;
+	//static unsigned int inc2 = 2;
+		unsigned char begin = 0x55;
+	//static struct ImageEntry entities[50];
+		static unsigned char counter = 0;
 	
 
-
-	vidClearHalfScreen();
+		if(TableReady){
+			TableReady = 0;
+			entities_counter = getchar();
+			USART_readData(EntitiesToProcess, sizeof(struct ImageEntry), entities_counter);
+			counter = 2;
+		}
 		
-	for (i = 0; i < num_entities; i++){ 
-//		eraseSquare(entities[i].y, entities[i].x, entities[i].height, entities[i].width);
-		processEntity(&entities[i]);
-	}
-
+		if(counter-- > 0){
+			vidClearHalfScreen();
+		
+			for (i = 0; i < entities_counter; i++){ 
+			//eraseSquare(entities[i].y, entities[i].x, entities[i].height, entities[i].width);
+				processEntity(&EntitiesToProcess[i]);
+			}
+		}
+		else{
+			putchar(0x55);
+		}
+		
+}
+		
+	
+	
+	
+	/*
 
 	if(flag == 0){
 
@@ -266,14 +328,14 @@ void process(){
 		
 		entities[6].type = 1;
 		entities[6].height = 30;
-		entities[6].width = 49;
+		entities[6].width = 50;
 		entities[6].y = 350;
 		entities[6].x = 0;
 		entities[6].color = 0;
 		
 		entities[7].type = 1;
 		entities[7].height = 10;
-		entities[7].width = 10;
+		entities[7].width = 75;
 		entities[7].y = 60;
 		entities[7].x = 160;
 		entities[7].color = 0;
@@ -302,7 +364,12 @@ void process(){
 			inc = 2;
 		if(entities[0].x + 30 >= VID_VSIZE)
 			inc = -2;
-
-	}
 		
-}
+		entities[6].x += inc2;
+		if(entities[6].x <= 0)
+			inc2 = 2;
+		if(entities[6].x + 50 >= VID_VSIZE)
+			inc2 = -2;
+	}
+	*/
+

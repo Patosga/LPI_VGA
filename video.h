@@ -30,7 +30,7 @@ void TIM5_Init(void);
 __inline int DrawPoint(signed int x_point,signed int y_point,uint8_t data)
 {
 	if(x_point > VID_VSIZE - 1  || y_point > VID_HSIZE-1 || x_point < 0 || y_point < 0) return 0; //erro
-	if((x_point >= (VID_VSIZE/2)  /*&& istopdrawing*/) || (x_point <= (VID_VSIZE/2) - 1 /*&& isbotdrawing*/))
+	if((x_point >= (VID_VSIZE/2)  && istopdrawing) || (x_point <= (VID_VSIZE/2) - 1 && isbotdrawing))
 	{fb[x_point][y_point+1] = data;}
 	return 0;
 }

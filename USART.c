@@ -4,10 +4,9 @@
 #define DISABLE_DMA_INTERRUPTS NVIC_DisableIRQ(DMA1_Stream6_IRQn);NVIC_DisableIRQ(DMA1_Stream5_IRQn);
 #define ENABLE_DMA_INTERRUPTS NVIC_EnableIRQ(DMA1_Stream6_IRQn);NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 
-char input_buffer[INPUT_BUFFER_LENGTH];
-char aux_buffer[INPUT_BUFFER_LENGTH];
+char input_buffer[INPUT_BUFFER_LENGTH]  __attribute__((at(0x2001C000))) ;
 volatile unsigned int istart, iend;
-char output_buffer[OUTPUT_BUFFER_LENGTH];
+char output_buffer[OUTPUT_BUFFER_LENGTH] __attribute__((at(0x2001C000 + INPUT_BUFFER_LENGTH))) ;
 volatile unsigned int ostart, oend;
 
 volatile unsigned char sendactive;
@@ -17,7 +16,9 @@ volatile unsigned char TableReady = 0;
 
 void putbuf(char c);
 
-unsigned int vsram2received __attribute__((at(0x2001D000))) = 0;
+unsigned int vsram2received __attribute__((at(0x2001D804))) = 0;
+
+
 
 //RX
 __irq void DMA1_Stream5_IRQHandler(void){
@@ -27,9 +28,8 @@ __irq void DMA1_Stream5_IRQHandler(void){
 	
 		DMA_ClearITPendingBit(DMA1_Stream5, DMA_IT_TCIF5);
 	
-		
 		if(first){
-				counter = c;
+				counter = vsram2received;
 				first = 0;
 		}
 		else{
@@ -212,7 +212,7 @@ void USART_init(void){
   NVIC_Init(&NVIC_InitStructure);
 	
 	//USART structinitialization
-	usart_init_struct.USART_BaudRate= 500000; // baudrate
+	usart_init_struct.USART_BaudRate= BAUDRATE; // baudrate
 	usart_init_struct.USART_WordLength = USART_WordLength_8b; // frame size 8 bits (standard)
 	usart_init_struct.USART_StopBits= USART_StopBits_1; // 1 stop bit (standard)
 	usart_init_struct.USART_Parity= USART_Parity_No; // no parity bit (standard)

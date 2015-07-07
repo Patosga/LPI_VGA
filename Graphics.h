@@ -9,7 +9,10 @@
 #define COLOR_BLACK 0x00
 #define GDA_FALSE 0
 #define GDA_TRUE 1
-	
+
+
+
+
 
 //extern __align(1) __IO unsigned char fb[VID_VSIZE][VID_HSIZE+2] ;	/* Frame buffer */
 //extern __align(1) __IO unsigned char fb2[VID_VSIZE][VID_HSIZE+2] ;	/* Frame buffer */
@@ -60,6 +63,17 @@ typedef struct primImage{
 	GDAu16 width;
 } primImage;
 
+typedef struct primString{
+	int index;
+	GDAu16 x0;
+	GDAu16 y0;
+	GDAu16 height;
+	GDAu16 width;
+	GDAu16 size;
+	GDAu8 FillColor;
+} primString;
+
+
 struct ImageEntry {
 	unsigned char type;
 	unsigned char layer;
@@ -83,6 +97,8 @@ void gdaClearColor(GDAu16 R, GDAu16 G, GDAu16 B);
 
 void gdaDrawImage(char image_index,int x,int y,int width, int height);
 void processEntity(struct ImageEntry *Entity);
+void gdaDrawLetter(unsigned char image_index,int x,int y,int width, int height);
+void gdaDrawString(unsigned char index,int tamanho, int x, int y);
 
 
 void process();

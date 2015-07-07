@@ -14,9 +14,9 @@ extern "C" {
 
 #include <stdio.h>
 
-#define INPUT_BUFFER_LENGTH 16
-#define OUTPUT_BUFFER_LENGTH 256
-#define BAUDRATE 500000
+#define INPUT_BUFFER_LENGTH 2048
+#define OUTPUT_BUFFER_LENGTH 2048
+#define BAUDRATE 2000000
 	
 
 extern char input_buffer[INPUT_BUFFER_LENGTH];
@@ -27,6 +27,7 @@ extern volatile unsigned int ostart, oend;
 
 extern volatile unsigned char sendactive;
 extern volatile unsigned char sendfull;
+	
 	
 extern volatile unsigned char TableReady;
 
